@@ -1,7 +1,7 @@
 # detective-pikachu-dance.io
 detective pikachu doing his job
 
-An initiative, using frames from [`terminal-parrot`](https://github.com/jmhobbs/terminal-parrot), to allow any computer with `curl` to display detective_pikachu_partying_with_other_pokemon.
+An initiative, using frames from [`terminal-parrot`](https://github.com/k85601/detective-pikachu-dance), to allow any computer with `curl` to display detective_pikachu_partying_with_other_pokemon.
 
 # Try it!
 ```bash
