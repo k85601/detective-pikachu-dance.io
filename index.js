@@ -78,9 +78,9 @@ const server = http.createServer((req, res) => {
 });
 
 // Load frames FIRST, then start the server
-(async () => {
+async function loadAndStart() {
   const framesPath = 'frames';
-  const files = (await fs.readdir(framesPath)).sort(); // Fix 1: sorted
+  const files = (await fs.readdir(framesPath)).sort();
 
   original = await Promise.all(files.map(async (file) => {
     const frame = await fs.readFile(path.join(framesPath, file));
@@ -89,12 +89,17 @@ const server = http.createServer((req, res) => {
 
   console.log(`Loaded ${original.length} frames`);
 
-  // Fix 2: server starts only after frames are ready
   const port = process.env.PORT || 3000;
   server.listen(port, err => {
     if (err) throw err;
     console.log(`Listening on http://localhost:${port}`);
   });
+}
+
+loadAndStart().catch((err) => {
+  console.log('Error loading frames');
+  console.log(err);
+});
 
 }).catch((err) => {
   console.log('Error loading frames');
