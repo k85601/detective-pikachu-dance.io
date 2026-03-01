@@ -1,7 +1,6 @@
 const fs = require('mz/fs');
 const path = require('path');
 const http = require('http');
-const url = require('url');
 const { Readable } = require('stream');
 const colors = require('colors/safe');
 
@@ -18,7 +17,7 @@ const selectColor = previousColor => {
   return color;
 };
 
-function streamer(stream, opts) {
+function streamer(stream) {
   const frames = original;
   let index = 0;
   let lastColor;
@@ -56,7 +55,7 @@ const server = http.createServer((req, res) => {
   }
 
   const stream = new Readable({ read() {} });
-  stream.on('error', () => {}); // Fix 4: prevent crash on disconnect
+  stream.on('error', () => {});
 
   res.writeHead(200, {
     'Content-Type': 'text/plain; charset=utf-8',
@@ -65,7 +64,7 @@ const server = http.createServer((req, res) => {
 
   stream.pipe(res);
 
-  const cleanupLoop = streamer(stream, {});
+  const cleanupLoop = streamer(stream);
 
   const onClose = () => {
     cleanupLoop();
@@ -77,7 +76,6 @@ const server = http.createServer((req, res) => {
   res.on('error', onClose);
 });
 
-// Load frames FIRST, then start the server
 async function loadAndStart() {
   const framesPath = 'frames';
   const files = (await fs.readdir(framesPath)).sort();
@@ -87,21 +85,19 @@ async function loadAndStart() {
     return frame.toString();
   }));
 
-  console.log(`Loaded ${original.length} frames`);
+  console.log('Loaded ' + original.length + ' frames');
 
   const port = process.env.PORT || 3000;
-  server.listen(port, err => {
+  server.listen(port, function(err) {
     if (err) throw err;
-    console.log(`Listening on http://localhost:${port}`);
+    console.log('Listening on http://localhost:' + port);
   });
 }
 
-loadAndStart().catch((err) => {
+loadAndStart().catch(function(err) {
   console.log('Error loading frames');
   console.log(err);
 });
-
-}).catch((err) => {
   console.log('Error loading frames');
   console.log(err);
 });
