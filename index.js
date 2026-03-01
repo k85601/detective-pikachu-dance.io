@@ -98,6 +98,3 @@ loadAndStart().catch(function(err) {
   console.log('Error loading frames');
   console.log(err);
 });
-  console.log('Error loading frames');
-  console.log(err);
-});
