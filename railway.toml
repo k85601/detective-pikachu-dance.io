@@ -3,3 +3,6 @@ buildCommand = "npm install"
 
 [deploy]
 startCommand = "npm start"
+
+[build.nixpacks]
+cmds = ["npm install"]
