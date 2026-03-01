@@ -1,6 +1,3 @@
-
-
-
 const fs = require('mz/fs');
 const path = require('path');
 const http = require('http');
@@ -93,7 +90,7 @@ const server = http.createServer((req, res) => {
   console.log(`Loaded ${original.length} frames`);
 
   // Fix 2: server starts only after frames are ready
-  const port = process.env.PARROT_PORT || 3000;
+  const port = process.env.PORT || 3000;
   server.listen(port, err => {
     if (err) throw err;
     console.log(`Listening on http://localhost:${port}`);
