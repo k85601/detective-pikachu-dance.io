@@ -9,37 +9,37 @@ let original = [];
 const colorsOptions = ['red', 'yellow', 'green', 'blue', 'magenta', 'cyan', 'white'];
 const numColors = colorsOptions.length;
 
-const selectColor = previousColor => {
+function selectColor(previousColor) {
   let color;
   do {
     color = Math.floor(Math.random() * numColors);
   } while (color === previousColor);
   return color;
-};
+}
 
 function streamer(stream) {
-  const frames = original;
   let index = 0;
   let lastColor;
   let timer;
 
   function tick() {
     stream.push('\u001b[2J\u001b[H');
-    const colorIdx = lastColor = selectColor(lastColor);
-    const coloredFrame = colors[colorsOptions[colorIdx]](frames[index]);
+    const colorIdx = selectColor(lastColor);
+    lastColor = colorIdx;
+    const coloredFrame = colors[colorsOptions[colorIdx]](original[index]);
     stream.push(coloredFrame);
-    index = (index + 1) % frames.length;
+    index = (index + 1) % original.length;
     timer = setTimeout(tick, 70);
   }
 
   tick();
 
-  return () => {
+  return function() {
     clearTimeout(timer);
   };
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(function(req, res) {
   if (req.url === '/healthcheck') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ status: 'ok' }));
@@ -54,8 +54,8 @@ const server = http.createServer((req, res) => {
     return res.end();
   }
 
-  const stream = new Readable({ read() {} });
-  stream.on('error', () => {});
+  const stream = new Readable({ read: function() {} });
+  stream.on('error', function() {});
 
   res.writeHead(200, {
     'Content-Type': 'text/plain; charset=utf-8',
@@ -64,37 +64,53 @@ const server = http.createServer((req, res) => {
 
   stream.pipe(res);
 
-  const cleanupLoop = streamer(stream);
+  const cleanup = streamer(stream);
 
-  const onClose = () => {
-    cleanupLoop();
+  function onClose() {
+    cleanup();
     stream.unpipe(res);
     stream.destroy();
-  };
+  }
 
   res.on('close', onClose);
   res.on('error', onClose);
 });
 
-async function loadAndStart() {
+function loadAndStart() {
   const framesPath = 'frames';
-  const files = (await fs.readdir(framesPath)).sort();
-
-  original = await Promise.all(files.map(async (file) => {
-    const frame = await fs.readFile(path.join(framesPath, file));
-    return frame.toString();
-  }));
-
-  console.log('Loaded ' + original.length + ' frames');
-
-  const port = process.env.PORT || 3000;
-  server.listen(port, function(err) {
-    if (err) throw err;
-    console.log('Listening on http://localhost:' + port);
+  fs.readdir(framesPath).then(function(files) {
+    files = files.sort();
+    return Promise.all(files.map(function(file) {
+      return fs.readFile(path.join(framesPath, file)).then(function(frame) {
+        return frame.toString();
+      });
+    }));
+  }).then(function(frames) {
+    original = frames;
+    console.log('Loaded ' + original.length + ' frames');
+    const port = process.env.PORT || 3000;
+    server.listen(port, function(err) {
+      if (err) throw err;
+      console.log('Listening on port ' + port);
+    });
+  }).catch(function(err) {
+    console.log('Error loading frames');
+    console.log(err);
   });
 }
 
-loadAndStart().catch(function(err) {
-  console.log('Error loading frames');
-  console.log(err);
-});
+loadAndStart();
+```
+
+---
+
+## Step 2 — Scroll down and click "Commit changes" twice
+
+---
+
+## Step 3 — Check Railway redeploys automatically
+
+The log should show:
+```
+Loaded X frames
+Listening on port 3000
