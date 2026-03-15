@@ -112,5 +112,3 @@ loadAndStart();
 
 The log should show:
 ```
-Loaded X frames
-Listening on port 3000
