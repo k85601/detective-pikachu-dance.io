@@ -100,15 +100,3 @@ function loadAndStart() {
 }
 
 loadAndStart();
-```
-
----
-
-## Step 2 — Scroll down and click "Commit changes" twice
-
----
-
-## Step 3 — Check Railway redeploys automatically
-
-The log should show:
-```
